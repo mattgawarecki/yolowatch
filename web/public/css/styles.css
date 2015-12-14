@@ -1,0 +1,15 @@
+.container {
+  text-align: center;
+}
+
+#header {
+  font-size: 48pt;
+  color: red;
+  font-weight: bold;
+}
+
+#footer {
+  font-variant: small-caps;
+  font-style: italic;
+  color: lightgrey;
+}

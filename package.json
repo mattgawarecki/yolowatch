@@ -1,0 +1,34 @@
+{
+  "name": "yolowatch",
+  "version": "1.0.0",
+  "description": "A web interface that keeps a running count of the number of times the phrase \"YOLO\" is mentioned on Twitter",
+  "engines": {
+    "node": "5.1.0"
+  },
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattgawarecki/yolowatch.git"
+  },
+  "keywords": [
+    "yolo",
+    "twitter"
+  ],
+  "author": "Matt Gawarecki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mattgawarecki/yolowatch/issues"
+  },
+  "homepage": "https://github.com/mattgawarecki/yolowatch#readme",
+  "dependencies": {
+    "express": "4.13.3",
+    "foreman": "1.4.1",
+    "jade": "1.11.0",
+    "moment": "2.10.6",
+    "nedb": "1.5.0",
+    "twit": "2.1.1"
+  }
+}
