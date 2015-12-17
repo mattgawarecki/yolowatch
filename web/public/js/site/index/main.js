@@ -3,7 +3,8 @@ Api.getStartDate(function(startDate) {
   $('.meta-start-date').text(formatted);
 });
 
-setInterval(refresh, 1000);
+setTimeout(refresh, 1000);
+setInterval(refresh, 5000);
 
 
 function refreshAllCounter() {
@@ -36,20 +37,11 @@ function refreshCurrentMonthCounter() {
   });
 }
 
-function refreshHistoricalMonthCounter() {
-  Api.getHistoricalMonthCounter(function(res) {
-    var div = $('.counter[data-type=historical_month]');
-    div.find('.counter-key').text(res.key);
-    div.find('.counter-count').text(res.count);
-  });
-}
-
 function refresh() {
   refreshAllCounter();
   refreshCurrentHourCounter();
   refreshYearCounter();
   refreshCurrentMonthCounter();
-  refreshHistoricalMonthCounter();
 
   $('.loading').forEach(function(f) { f.style.display = 'none'; });
   $('.data').forEach(function(f) { f.style.display = 'block'; });

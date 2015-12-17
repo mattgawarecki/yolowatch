@@ -60,17 +60,5 @@ var Api = {
         count: res.data.count
       });
     });
-  },
-  getHistoricalMonthCounter: function(callback) {
-    var now = moment();
-    var month = now.utc().month() + 1;
-    _requestApiData('/counters/month/' + month, function(res) {
-      var totalCount = res.data.reduce(function(acc, next) { return acc + next.count; }, 0);
-      var mean = (totalCount / res.data.length).toFixed(2);
-      return callback({
-        key: moment.months()[now.local().month()],
-        count: mean
-      });
-    });
   }
 };
