@@ -2,13 +2,17 @@
   text-align: center;
 }
 
-#header {
+.data {
+  display: none;
+}
+
+.header {
   font-size: 48pt;
   color: red;
   font-weight: bold;
 }
 
-#footer {
+.footer {
   font-variant: small-caps;
   font-style: italic;
   color: lightgrey;

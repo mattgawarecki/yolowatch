@@ -6,69 +6,45 @@ html
     link(rel='stylesheet', href='/css/styles.css')
   body
     div.container
-      div.col-md-8.col-md-offset-2
-        h1#header.jumbotron #YOLOWatch
-        
-        h1#loading Loading...
-        
-        div#data.row.hidden
-          div.lead
-            | Since 
-            div#start.h1
-            | the phrase "YOLO" has been mentioned approximately
-            div.h1
-              span#count.odometer
-              |  times
-            | on Twitter.
-          div.lead
-            | That's about 
-            span#frequency.odometer
-            |  times per minute.
+      div.row.header
+        div.col-md-8.col-md-offset-2
+          h1.jumbotron.header #YOLOWatch
+          
+      div.row.loading
+        div.col-md-8.col-md-offset-2
+          h1 Loading ...
       
-      div.col-md-4.col-md-offset-4
-        p#footer
-          a(href='http://about.me/mattgawarecki') Matt Gawarecki
-          |  (c) #{new Date().getFullYear()}
+      div.row.data
+        div.col-md-8.col-md-offset-2
+          include ../includes/index/counters/all.jade
+          hr
+          
+      div.row.data
+        div.col-md-8.col-md-offset-2
+          include ../includes/index/counters/current_hour.jade
+          hr
+          
+      div.row.data
+        div.col-md-8.col-md-offset-2
+          include ../includes/index/counters/year.jade
+          hr
+          
+      div.row.data
+        div.col-md-8.col-md-offset-2
+          include ../includes/index/counters/current_month.jade
+          hr
+          
+      div.row.data
+        div.col-md-8.col-md-offset-2
+          include ../includes/index/counters/historical_month.jade
+          hr
+      
+      div.row.footer
+        div.col-md-8.col-md-offset-2
+          include ../includes/footer.jade
     
     script(src='/js/odometer.min.js')
     script(src='/js/moment.min.js')
-    script.
-      function hide(id) {
-        var className = document.getElementById(id).className;
-        if (!className || className.indexOf('hidden') == -1) {
-          document.getElementById(id).className += ' hidden';
-        }
-      }
-      
-      function show(id) {
-        var original = document.getElementById(id).className;
-        var notHidden = original.replace(/(?:^|\s)hidden(?!\S)/g, '');
-        document.getElementById(id).className = notHidden;
-      }
-    
-      function refresh() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', encodeURI('/data'));
-        xhr.onload = function() {
-          var response = JSON.parse(xhr.response);
-          
-          var start = moment(response.start).format('LLL');
-          document.getElementById('start').innerHTML = start;
-          document.getElementById('count').innerHTML = response.count;
-          document.getElementById('frequency').innerHTML =
-            frequency(start, response.count).toFixed(2);
-          
-          hide('loading');
-          show('data');
-        };
-        xhr.send();
-      }
-      
-      function frequency(start, count) {
-        var startDate = new Date(start);
-        var durationInMinutes = (new Date() - startDate) / (1000 * 60);
-        
-        return count / durationInMinutes;
-      }
-      
-      setInterval(refresh, 1000);
+    script(src='/js/domtastic.min.js')
+    script(src='/js/site/api.js')
+    script(src='/js/site/index/main.js')
