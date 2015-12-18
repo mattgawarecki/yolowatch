@@ -1,8 +1,4 @@
 {
-  /**
-   * Application configuration section
-   * http://pm2.keymetrics.io/docs/usage/application-declaration/
-   */
   "apps": [
     {
       "name": "worker",
@@ -25,5 +21,15 @@
         "NODE_ENV": "production"
       }
     }
-  ]
+  ],
+  "deploy": {
+    "production": {
+      "user": "yolowatch",
+      "repo": "https://github.com/mattgawarecki/yolowatch",
+      "post-deploy": "npm i ; pm2 startOrRestart ecosystem.json --env production",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
 }
