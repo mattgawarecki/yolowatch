@@ -1,3 +1,4 @@
+var config = require('../common/config');
 var logger = require('../common/logger');
 
 logger.info('Starting web server.');
@@ -20,15 +21,11 @@ logger.debug('Setting views engine.');
 app.set('view engine', 'jade');
 
 logger.debug('Initializing router.');
-
 app.get('/', function(req, res) {
   res.render('index');
 });
 
-var apiRouter = require('../api/router');
-app.use('/api', apiRouter);
-
-var port = process.env.YW_WEB_PORT || 8080;
+var port = config.web.port || 8080;
 var server = app.listen(port, function() {
   var host = server.address().address;
   var port = server.address().port;

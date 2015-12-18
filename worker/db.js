@@ -1,10 +1,7 @@
 var logger = require('../common/logger');
 var moment = require('moment');
-var path = require('path');
-var DataStore = require('nedb');
 
-var dbPath = path.join(__dirname, '../db');
-var db = new DataStore({ filename: dbPath });
+var db = require('../common/db');
 db.initialize = function(callback) {
   db.loadDatabase();
 

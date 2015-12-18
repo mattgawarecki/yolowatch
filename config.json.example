@@ -1,0 +1,39 @@
+{
+  "development": {
+    "db": {
+      "file": "./db"
+    },
+    "logger": {
+      "level": "silly"
+    },
+    "web": {
+      "port": 9000
+    },
+    "api": {
+      "port": 9001
+    },
+    "worker": {
+      "consumer_secret": "CONSUMER_SECRET",
+      "access_token_secret": "ACCESS_TOKEN_SECRET"
+    }
+  },
+  "production": {
+    "db": {
+      "file": "./db"
+    },
+    "logger": {
+      "level": "silly",
+      "path": "./"
+    },
+    "web": {
+      "port": 9000
+    },
+    "api": {
+      "port": 9001
+    },
+    "worker": {
+      "consumer_secret": "CONSUMER_SECRET",
+      "access_token_secret": "ACCESS_TOKEN_SECRET"
+    }
+  }
+}

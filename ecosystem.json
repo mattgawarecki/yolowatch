@@ -1,0 +1,29 @@
+{
+  /**
+   * Application configuration section
+   * http://pm2.keymetrics.io/docs/usage/application-declaration/
+   */
+  "apps": [
+    {
+      "name": "worker",
+      "script": "worker/worker.js",
+      "env_production": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "api",
+      "script": "api/server.js",
+      "env_production": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "web",
+      "script": "web/server.js",
+      "env_production": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

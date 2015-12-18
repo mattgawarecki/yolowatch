@@ -1,15 +1,19 @@
+var config = require('../common/config');
 var logger = require('../common/logger');
 var moment = require('moment');
 
-logger.info('Starting worker process.');
-var db = require('./db');
-var watcher = require('./watcher');
+var Watcher = require('./watcher');
 
+logger.info('Starting worker process.');
+
+var db = require('./db');
 db.initialize(function(err, doc) {
   if (err) {
     logger.error('Cannot continue. Shutting down.');
   } else {
-    watcher.start(function(tweet) { return onYolo(db, tweet); });
+    var w = Watcher(config.worker.consumer_secret, config.worker.access_token_secret);
+    w.start(function(tweet) { return onYolo(db, tweet); });
+
     logger.info('Worker process started.');
     // Run forever until the process is killed
   }

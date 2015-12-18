@@ -1,4 +1,4 @@
-var db = require('../db');
+var db = require('../../common/db');
 
 function sanitizeCounterData(data) {
   var sanitized = {
