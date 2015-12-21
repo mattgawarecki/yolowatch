@@ -46,11 +46,21 @@ function getCounters() {
       }
     },
     {
+      type: 'date',
+      key: {
+        year: now.year(),
+        month: now.month() + 1,
+        date: now.date(),
+        day_of_year: now.dayOfYear()
+      }
+    },
+    {
       type: 'hour',
       key: {
         year: now.year(),
         month: now.month() + 1,
         date: now.date(),
+        day_of_year: now.dayOfYear(),
         hour: now.hour()
       }
     }

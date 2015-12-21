@@ -1,48 +1,99 @@
-Api.getStartDate(function(startDate) {
-  var formatted = moment(startDate).format('LLL');
-  $('.meta-start-date').text(formatted);
+startCounters(function(counters) {
+  refreshCounters(counters, function() {
+    $('.loading').addClass('hidden');
+    $('.data').removeClass('hidden');
+
+    setInterval(function() {
+      refreshCounters(counters);
+    }, 3000);
+  });
 });
 
-setTimeout(refresh, 1000);
-setInterval(refresh, 5000);
-
-
-function refreshAllCounter() {
-  Api.getAllCounter(function(res) {
-    var div = $('.counter[data-type=all]');
-    div.find('.counter-count').text(res.count);
-    div.find('.counter-frequency').text(res.frequency);
+function startCounters(onStarted) {
+  Api.getStartDate(function(d) {
+    var formattedDate = moment(d).format('LL');
+    $('.start-date').text(formattedDate);
+    enableCounters(d, function(enabledCounters) {
+      // Refresh all enabled counters; when finished, notify the page
+      // that all counters have been started
+      refreshCounters(enabledCounters, function() {
+        onStarted(enabledCounters);
+      });
+    });
   });
 }
 
-function refreshCurrentHourCounter() {
-  Api.getCurrentHourCounter(function(res) {
-    var div = $('.counter[data-type=current_hour]');
-    div.find('.counter-count').text(res.count);
-  });
+function dataPresentForTimeSpan(part, start, end) {
+  var startPeriod = moment(start).startOf(part);
+  var endPeriod = moment(end).startOf(part);
+  return endPeriod > startPeriod;
 }
 
-function refreshYearCounter() {
-  Api.getYearCounter(function(res) {
-    var div = $('.counter[data-type=year]');
-    div.find('.counter-key').text(res.key);
-    div.find('.counter-count').text(res.count);
+function enableCounters(startDate, onEnabled) {
+  var checkSpan = function(part) { return dataPresentForTimeSpan(part, startDate, new Date()); };
+
+  var allCounterStatuses = {
+    all: true,
+    current_hour: checkSpan('hour'),
+    current_day: checkSpan('day'),
+    previous_day: dataPresentForTimeSpan('day', startDate, moment().subtract(1, 'day')),
+    current_month: checkSpan('month'),
+    current_year: checkSpan('year')
+  };
+
+  // Get all the elements with the 'counter' class and key them by counter type
+  var allCounterElementsByType = $('.counter').reduce(function(acc, next) {
+    var currentCounterType = next.getAttribute('data-type');
+    acc[currentCounterType] = $(next);
+    return acc;
+  }, {});
+
+  // For each counter that should NOT be enabled, add the 'hidden' class to it
+  Object.keys(allCounterStatuses).filter(function(c) {
+    return !allCounterStatuses[c];
+  }).forEach(function(c) {
+    allCounterElementsByType[c].addClass('hidden');
   });
+
+  // Continue on, passing the names of the counters the page should keep updated
+  var countersToRefresh = Object.keys(allCounterStatuses).filter(function(c) {
+    return allCounterStatuses[c];
+  });
+
+  onEnabled(countersToRefresh);
 }
 
-function refreshCurrentMonthCounter() {
-  Api.getCurrentMonthCounter(function(res) {
-    var div = $('.counter[data-type=current_month]');
-    div.find('.counter-count').text(res.count);
-  });
+function refreshCounters(counters, onRefreshed) {
+  // Methods used to update each counter
+  var allCounterRefreshMethods = {
+    all: function() { refreshCounterByName('all'); },
+    current_hour: function() { refreshCounterByName('current_hour'); },
+    current_day: function() { refreshCounterByName('current_day'); },
+    previous_day: function() { refreshCounterByName('previous_day'); },
+    current_month: function() { refreshCounterByName('current_month'); },
+    current_year: function() { refreshCounterByName('current_year'); },
+  };
+
+  var enabledCounterRefreshMethods = counters.reduce(function(acc, next) {
+    acc[next] = function(callback) { allCounterRefreshMethods[next](); callback(null); };
+    return acc;
+  }, {});
+
+  async.parallel(enabledCounterRefreshMethods, onRefreshed);
 }
 
-function refresh() {
-  refreshAllCounter();
-  refreshCurrentHourCounter();
-  refreshYearCounter();
-  refreshCurrentMonthCounter();
+function refreshCounterByName(name) {
+  var methods = {
+    all: Api.getAllCounter,
+    current_hour: Api.getCurrentHourCounter,
+    current_day: Api.getCurrentDayCounter,
+    previous_day: Api.getPreviousDayCounter,
+    current_month: Api.getCurrentMonthCounter,
+    current_year: Api.getCurrentYearCounter
+  };
 
-  $('.loading').forEach(function(f) { f.style.display = 'none'; });
-  $('.data').forEach(function(f) { f.style.display = 'block'; });
+  methods[name](function(res) {
+    var counter = $('.counter[data-type=' + name + '] .counter-count');
+    counter.text(res.count);
+  });
 }

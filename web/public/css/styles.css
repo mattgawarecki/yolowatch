@@ -2,14 +2,10 @@
   text-align: center;
 }
 
-.data {
-  display: none;
-}
-
-.header {
-  font-size: 48pt;
-  color: red;
-  font-weight: bold;
+.borderless tbody tr td,
+.borderless tbody tr th,
+.borderless thead tr th {
+  border: none;
 }
 
 .footer {

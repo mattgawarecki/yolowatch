@@ -15,23 +15,16 @@ var Api = {
     });
   },
   getAllCounter: function(callback) {
-    _requestApiData('/counters/all', function(counter) {
-      Api.getStartDate(function(startDate) {
-        var minutes = moment.duration(moment() - moment(startDate)).asMinutes();
-        var timesPerMinute = counter.data.count / minutes;
-
-        return callback({
-          start_date: moment(startDate).toDate(),
-          count: counter.data.count,
-          frequency: timesPerMinute
-        });
+    _requestApiData('/counters/all', function(res) {
+      return callback({
+        count: res.data.count
       });
     });
   },
   getCurrentHourCounter: function(callback) {
     var now = moment().utc();
 
-    var route = '/counters/detail/' +
+    var route = '/counters/hour/' +
       now.year() + '/' +
       (now.month() + 1) + '/' +
       now.date() + '/' +
@@ -42,11 +35,22 @@ var Api = {
       });
     });
   },
-  getYearCounter: function(callback) {
-    var now = moment();
-    _requestApiData('/counters/year/' + now.utc().year(), function(res) {
+  getCurrentDayCounter: function(callback) {
+    var now = moment().utc();
+    var year = now.year();
+    var dayOfYear = now.dayOfYear();
+    _requestApiData('/counters/date/' + year + '/' + dayOfYear, function(res) {
       return callback({
-        key: now.local().year(),
+        count: res.data.count
+      });
+    });
+  },
+  getPreviousDayCounter: function(callback) {
+    var now = moment().subtract(1, 'day').utc();
+    var year = now.year();
+    var dayOfYear = now.dayOfYear();
+    _requestApiData('/counters/date/' + year + '/' + dayOfYear, function(res) {
+      return callback({
         count: res.data.count
       });
     });
@@ -57,6 +61,15 @@ var Api = {
     var month = now.utc().month() + 1;
     _requestApiData('/counters/month/' + year + '/' + month, function(res) {
       return callback({
+        count: res.data.count
+      });
+    });
+  },
+  getCurrentYearCounter: function(callback) {
+    var now = moment();
+    _requestApiData('/counters/year/' + now.utc().year(), function(res) {
+      return callback({
+        key: now.local().year(),
         count: res.data.count
       });
     });
