@@ -35,6 +35,7 @@ function enableCounters(startDate, onEnabled) {
   var allCounterStatuses = {
     all: true,
     current_hour: checkSpan('hour'),
+    previous_hour: dataPresentForTimeSpan('hour', startDate, moment().subtract(1, 'hour')),
     current_day: checkSpan('day'),
     previous_day: dataPresentForTimeSpan('day', startDate, moment().subtract(1, 'day')),
     current_month: checkSpan('month'),
@@ -68,6 +69,7 @@ function refreshCounters(counters, onRefreshed) {
   var allCounterRefreshMethods = {
     all: function() { refreshCounterByName('all'); },
     current_hour: function() { refreshCounterByName('current_hour'); },
+    previous_hour: function() { refreshCounterByName('previous_hour'); },
     current_day: function() { refreshCounterByName('current_day'); },
     previous_day: function() { refreshCounterByName('previous_day'); },
     current_month: function() { refreshCounterByName('current_month'); },
@@ -86,6 +88,7 @@ function refreshCounterByName(name) {
   var methods = {
     all: Api.getAllCounter,
     current_hour: Api.getCurrentHourCounter,
+    previous_hour: Api.getPreviousHourCounter,
     current_day: Api.getCurrentDayCounter,
     previous_day: Api.getPreviousDayCounter,
     current_month: Api.getCurrentMonthCounter,

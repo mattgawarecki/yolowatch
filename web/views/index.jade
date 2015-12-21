@@ -10,21 +10,30 @@ html
         div.col-md-8.col-md-offset-2
           h1 #YOLOWatch
           p
-            em Tracking the decline of the English language
-              span.data  since 
+            em
+              | Tracking the decline of the English language
+              span.data.hidden  since 
                 strong.start-date
+              | .
           hr
+          
+      div.row
+        div.col-md-8.col-md-offset-2
+          p
+            strong.
+              We monitor Twitter all day, every day. Whenever the phrase <em>YOLO</em> is mentioned, each of the counters below ticks upward, and somewhere a grammarian loses just a little more hope in humanity.
           
       div.row.loading
         div.col-md-8.col-md-offset-2
           h1 Loading ...
-          
+
       div.row.data.hidden
         div.col-md-4.col-md-offset-4
           table.table.borderless.lead
             tbody
               include ../includes/index/counters/all.jade
               include ../includes/index/counters/current_hour.jade
+              include ../includes/index/counters/previous_hour.jade
               include ../includes/index/counters/current_day.jade
               include ../includes/index/counters/previous_day.jade
               include ../includes/index/counters/current_month.jade

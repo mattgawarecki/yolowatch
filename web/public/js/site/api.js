@@ -35,6 +35,20 @@ var Api = {
       });
     });
   },
+  getPreviousHourCounter: function(callback) {
+    var now = moment().subtract(1, 'hour').utc();
+
+    var route = '/counters/hour/' +
+      now.year() + '/' +
+      (now.month() + 1) + '/' +
+      now.date() + '/' +
+      now.hour();
+    _requestApiData(route, function(res) {
+      return callback({
+        count: res.data.count
+      });
+    });
+  },
   getCurrentDayCounter: function(callback) {
     var now = moment().utc();
     var year = now.year();
