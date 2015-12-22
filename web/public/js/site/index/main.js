@@ -1,9 +1,12 @@
+refreshRecent();
+
 startCounters(function(counters) {
   refreshCounters(counters, function() {
     $('.loading').addClass('hidden');
     $('.data').removeClass('hidden');
 
     setInterval(function() {
+      refreshRecent();
       refreshCounters(counters);
     }, 3000);
   });
@@ -98,5 +101,19 @@ function refreshCounterByName(name) {
   methods[name](function(res) {
     var counter = $('.counter[data-type=' + name + '] .counter-count');
     counter.text(res.count);
+  });
+}
+
+function refreshRecent() {
+  console.log('refreshing recent');
+  Api.getRecentTweets(function(res) {
+    var recentTweets = $('.recent-tweets');
+    recentTweets.empty();
+    res.forEach(function(t) {
+      recentTweets.append(
+        '<dt class="tweet-screen-name">@' + t.screen_name + '</dl>' +
+        '<dd class="tweet-text">' + t.text + '</dd>'
+      );
+    });
   });
 }

@@ -10,6 +10,11 @@ var Api = {
       callback(res.data.start_date);
     });
   },
+  getRecentTweets: function(callback) {
+    _requestApiData('/recent/5', function(res) {
+      callback(res.data);
+    });
+  },
   getAllCounter: function(callback) {
     _requestApiData('/count', function(res) {
       return callback({
