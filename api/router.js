@@ -1,87 +1,58 @@
-var async = require('async');
-var logger = require('../common/logger');
+module.exports = function(options) {
+  var router = options.routerFactory();
 
-var express = require('express');
-var YoloWatch = require('./models/yolowatch');
-
-var router = express.Router();
-
-router.get('/meta', function(req, res) {
-  YoloWatch.getMeta(function(err, data) {
-    return res.json(data);
+  router.get('/meta/start_date', function(req, res, next) {
+    options.model.getStartDate(function(err, data) {
+      if (err) return next();
+      else return res.json({ data: data });
+    });
   });
-});
 
-router.get('/counters/all', function(req, res) {
-  YoloWatch.getCounter({ type: 'all' }, function(err, data) {
-    return res.json(data);
+  router.get('/count', function(req, res, next) {
+    options.model.getCountForSpan(undefined, undefined, function(err, data) {
+      if (err) return next();
+      else return res.json({ data: data });
+    });
   });
-});
 
-router.get('/counters/year/:year', function(req, res, next) {
-  var key = {
-    type: 'year',
-    key: {
-      'year': parseInt(req.params.year)
-    }
-  };
+  router.get('/count/from/:from/to/:to', function(req, res, next) {
+    var from = parseInt(req.params.from);
+    var to = parseInt(req.params.to);
+    if (!(from || to)) return next();
 
-  YoloWatch.getCounter(key, function(err, data) {
-    return res.json(data);
+    options.model.getCountForSpan(from, to, function(err, data) {
+      if (err) return next();
+      else return res.json({ data: data });
+    });
   });
-});
 
-router.get('/counters/month/:year/:month', function(req, res, next) {
-  var key = {
-    type: 'month',
-    key: {
-      year: parseInt(req.params.year),
-      month: parseInt(req.params.month)
-    }
-  };
+  router.get('/count/since/:start', function(req, res, next) {
+    var start = parseInt(req.params.start);
+    if (start !== 0 && !start) return next();
 
-  YoloWatch.getCounter(key, function(err, data) {
-    return res.json(data);
+    options.model.getCountForSpan(start, undefined, function(err, data) {
+      if (err) return next();
+      else return res.json({ data: data });
+    });
   });
-});
 
-router.get('/counters/date/:year/:month/:date', function(req, res, next) {
-  var key = {
-    type: 'date',
-    'key.year': parseInt(req.params.year),
-    'key.month': parseInt(req.params.month),
-    'key.date': parseInt(req.params.date)
-  };
+  router.get('/count/until/:end', function(req, res, next) {
+    var end = parseInt(req.params.end);
+    if (end !== 0 && !end) return next();
 
-  YoloWatch.getCounter(key, function(err, data) {
-    return res.json(data);
+    options.model.getCountForSpan(undefined, end, function(err, data) {
+      if (err) return next();
+      else return res.json({ data: data });
+    });
   });
-});
 
-router.get('/counters/date/:year/:dayOfYear', function(req, res, next) {
-  var key = {
-    type: 'date',
-    'key.year': parseInt(req.params.year),
-    'key.day_of_year': parseInt(req.params.dayOfYear)
-  };
-
-  YoloWatch.getCounter(key, function(err, data) {
-    return res.json(data);
+  router.get('/recent/:count', function(req, res, next) {
+    var count = Math.min(parseInt(req.params.count) || 5, options.endpoints.recent.max_count);
+    options.model.getRecent(count, function(err, data) {
+      if (err) return next();
+      else return res.json({ data: data });
+    });
   });
-});
 
-router.get('/counters/hour/:year/:month/:date/:hour', function(req, res, next) {
-  var key = {
-    type: 'hour',
-    'key.year': parseInt(req.params.year),
-    'key.month': parseInt(req.params.month),
-    'key.date': parseInt(req.params.date),
-    'key.hour': parseInt(req.params.hour)
-  };
-
-  YoloWatch.getCounter(key, function(err, data) {
-    return res.json(data);
-  });
-});
-
-module.exports = router;
+  return router;
+};

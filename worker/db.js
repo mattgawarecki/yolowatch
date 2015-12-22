@@ -1,29 +1,35 @@
-var logger = require('../common/logger');
-var moment = require('moment');
+var DataStore = require('nedb');
 
-var db = require('../common/db');
-db.initialize = function(callback) {
-  db.loadDatabase();
+module.exports = function(options) {
+  var db = {};
+  db.meta = new DataStore({ filename: options.meta.file, autoload: true });
+  db.tweets = new DataStore({ filename: options.tweets.file, autoload: true });
 
-  logger.debug('Initializing database.');
-  db.findOne({ $where: function() { return 'meta' in this; } }, function(err, doc) {
-    if (doc) {
-      logger.debug('Database already initialized.');
-      logger.silly('Start date:', doc.meta.start_date);
-      callback(null, doc);
-    } else {
-      db.insert({ meta: { start_date: moment().toDate() } }, function(err, newDoc) {
-        if (newDoc) {
-          logger.debug('Database initialized successfully.');
-          logger.silly('Start date:', newDoc.meta.start_date);
-          callback(null, newDoc);
-        } else {
-          logger.error('Error occurred while initializing database:', err);
-          callback(err);
-        }
-      });
-    }
-  });
+  db.meta.initialize = function(callback) {
+    options.logger.debug("Initializing 'meta' database.");
+    db.meta.findOne({ $where: function() { return 'start_date' in this; } }, function(err, doc) {
+      if (err) {
+        options.logger.error('Error occurred during check for proper initialization.');
+        options.logger.error(err);
+      } else if (doc) {
+        options.logger.debug('Database already initialized.');
+        options.logger.silly('Start date:', doc.start_date);
+        callback(null, doc);
+      } else {
+        db.meta.insert({ start_date: options.meta.now() }, function(err, newDoc) {
+          if (err) {
+            options.logger.error('Error occurred while initializing.');
+            options.logger.error(err);
+            callback(err);
+          } else {
+            options.logger.debug('Database initialized successfully.');
+            options.logger.silly('Start date:', newDoc.start_date);
+            callback(null, newDoc);
+          }
+        });
+      }
+    });
+  };
+
+  return db;
 };
-
-module.exports = db;

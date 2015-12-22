@@ -1,0 +1,64 @@
+var path = require('path');
+var dbBasePath = path.join(__dirname, './db');
+
+var environmentConfigs = {
+  development: {
+    db: {
+      meta: {
+        file: path.join(dbBasePath, './meta.db')
+      },
+      tweets: {
+        file: path.join(dbBasePath, './tweets.db')
+      }
+    },
+    logger: {
+      level: 'silly'
+    },
+    web: {
+      port: 9000
+    },
+    api: {
+      port: 9001,
+      recent: {
+        max_count: 20
+      }
+    },
+    worker: {
+      consumer_secret: 'CONSUMER_SECRET',
+      access_token_secret: 'ACCESS_TOKEN_SECRET'
+    }
+  },
+  production: {
+    db: {
+      meta: {
+        file: path.join(dbBasePath, './meta.db')
+      },
+      tweets: {
+        file: path.join(dbBasePath, './tweets.db')
+      }
+    },
+    logger: {
+      level: 'info'
+    },
+    web: {
+      port: 9000
+    },
+    api: {
+      port: 9001,
+      recent: {
+        max_count: 20
+      }
+    },
+    worker: {
+      consumer_secret: 'CONSUMER_SECRET',
+      access_token_secret: 'ACCESS_TOKEN_SECRET'
+    }
+  }
+};
+
+var activeConfig = environmentConfigs.development;
+if (process.env.NODE_ENV in environmentConfigs) {
+  activeConfig = environmentConfigs[process.env.NODE_ENV];
+}
+
+module.exports = activeConfig;

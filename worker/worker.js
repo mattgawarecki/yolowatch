@@ -1,68 +1,76 @@
-var config = require('../common/config');
-var logger = require('../common/logger');
-var moment = require('moment');
-
+var config = require('../config');
+var logger = require('../common/logger')(config.logger.level);
+var DB = require('./db');
 var Watcher = require('./watcher');
+
+var moment = require('moment');
 
 logger.info('Starting worker process.');
 
-var db = require('./db');
-db.initialize(function(err, doc) {
+var dataStores = getDataStores();
+var metaDb = dataStores.meta;
+var tweetDb = dataStores.tweets;
+
+metaDb.initialize(function(err, doc) {
   if (err) {
     logger.error('Cannot continue. Shutting down.');
   } else {
-    var w = Watcher(config.worker.consumer_secret, config.worker.access_token_secret);
-    w.start(function(tweet) { return onYolo(db, tweet); });
+    var w = getWatcher();
+    w.start();
 
     logger.info('Worker process started.');
     // Run forever until the process is killed
   }
 });
 
-function onYolo(db, tweet) {
-  var counters = getCounters();
-  counters.forEach(function(dbKey) {
-    db.update(dbKey, { $inc: { count: 1 } }, { upsert: true }, function() {
-      logger.debug('Counter updated:', dbKey);
-    });
+function now() {
+  return moment().utc().valueOf();
+}
+
+function getDataStores() {
+  return DB({
+    logger: logger,
+    meta: {
+      file: config.db.meta.file,
+      now: now
+    },
+    tweets: {
+      file: config.db.tweets.file
+    }
   });
 }
 
-function getCounters() {
-  var now = moment();
-  now.utc();
+function getWatcher() {
+  return Watcher({
+    credentials: {
+      consumer_key: '7tICA3DnSrUBrazFg5Yip5t7n',
+      consumer_secret: config.worker.consumer_secret,
+      access_token: '12466862-J0DwVlDtWPl0dtqrmQAFHOBZwawGTUlwAmP4rTO0p',
+      access_token_secret: config.worker.access_token_secret
+    },
+    onTweet: onYolo
+  });
+}
 
-  return [
-    { type: 'all' },
-    {
-      type: 'year',
-      key: { year: now.year() }
-    },
-    {
-      type: 'month',
-      key: {
-        year: now.year(),
-        month: now.month() + 1
+function onYolo(tweet) {
+  logger.debug('Tweet received.');
+
+  if (tweet.text.match(/yolo/i)) {
+    tweetDb.insert({
+      type: 'tweet',
+      timestamp: now(),
+      screen_name: tweet.user.screen_name,
+      text: tweet.text
+    }, function(err, newDoc) {
+      if (err) {
+        logger.error('Could not record tweet.');
+        logger.error(err);
+      } else {
+        logger.debug('Tweet recorded.');
+        logger.silly('[@' + newDoc.screen_name + '] ' + newDoc.text);
       }
-    },
-    {
-      type: 'date',
-      key: {
-        year: now.year(),
-        month: now.month() + 1,
-        date: now.date(),
-        day_of_year: now.dayOfYear()
-      }
-    },
-    {
-      type: 'hour',
-      key: {
-        year: now.year(),
-        month: now.month() + 1,
-        date: now.date(),
-        day_of_year: now.dayOfYear(),
-        hour: now.hour()
-      }
-    }
-  ];
-};
+    });
+  } else {
+    logger.debug('Tweet rejected - does not explicitly contain the targeted phrase.');
+  }
+}

@@ -1,72 +1,64 @@
-var db = require('../../common/db');
+var YoloWatch = function(options) {
+  var metaDb = options.db.meta;
+  var tweetsDb = options.db.tweets;
 
-function sanitizeCounterData(data) {
-  var sanitized = {
-    type: 'counter',
-    counter_type: data.type,
-    count: data.count
-  };
-
-  if (data.key) {
-    var keyFields = Object.keys(data.key);
-    if (keyFields.length === 1) sanitized.id = data.key[keyFields[0]];
-    else sanitized.id = data.key;
-  }
-
-  return sanitized;
-}
-
-var YoloWatch = {
-  getMeta: function(callback) {
-    db.loadDatabase();
-    db.findOne(
-      { $where: function() { return 'meta' in this; } },
-      { _id: 0 },
-      function(err, doc) {
-        if (err) callback(err);
-        else {
-          var sanitized = { type: 'meta' };
-          Object.keys(doc.meta).forEach(function(k) { sanitized[k] = doc.meta[k]; });
-
-          return callback(null, { data: sanitized });
+  return {
+    getStartDate: function(callback) {
+      metaDb.loadDatabase();
+      metaDb.findOne(
+        { $where: function() { return 'start_date' in this; } },
+        { _id: 0 },
+        function(err, doc) {
+          if (err) return callback(err);
+          else return callback(null, { start_date: doc.start_date });
         }
-      }
-    );
-  },
+      );
+    },
 
-  getCounter: function(key, callback) {
-    return module.exports.getCounters(key, function(err, data) {
-      if (err) {
-        return callback(err);
-      } else {
-        if (data.data.length === 0) {
-          return callback('Error');
-        } else if (data.data.length === 1) {
-          data.data = data.data[0];
-          return callback(null, data);
-        } else {
-          return callback('Error');
-        }
-      }
-    });
-  },
-
-  getCounters: function(key, callback) {
-    db.loadDatabase();
-    db.find(
-      key,
-      { _id: 0 },
-      function(err, docs) {
+    getRecent: function(count, callback) {
+      tweetsDb.loadDatabase();
+      tweetsDb.find({}, { _id: 0 }).sort({ timestamp: -1 }).limit(count).exec(function(err, docs) {
         if (err) return callback(err);
         else {
-          var result = {
-            data: docs.map(sanitizeCounterData)
-          };
+          var sanitized = docs.map(function(d) {
+            return {
+              type: 'tweet',
+              timestamp: d.timestamp,
+              text: d.text,
+              screen_name: d.screen_name
+            };
+          }).sort(function(a, b) {
+            return b.timestamp - a.timestamp;
+          });
 
-          return callback(null, result);
+          return callback(null, sanitized);
         }
-      }
-    )
+      });
+    },
+
+    getCountForSpan: function(start, end, callback) {
+      tweetsDb.loadDatabase();
+      tweetsDb.count(
+        {
+          $where: function() {
+            return (!start || this.timestamp >= start) && (!end || this.timestamp <= end);
+          }
+        },
+        function(err, count) {
+          if (err) return callback(err);
+          else {
+            var result = {
+              type: 'count',
+              start: start,
+              end: end,
+              count: count
+            };
+
+            return callback(null, result);
+          }
+        }
+      );
+    }
   }
 };
 
