@@ -1,34 +1,26 @@
 function _requestApiData(path, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', encodeURI('/api' + path));
-  xhr.onload = function() {
-    var response = JSON.parse(xhr.response);
-    callback(response);
-  };
-  xhr.send();
+  superagent.get('/api' + path).end(function(err, res) {
+    return callback(res.body);
+  });
 }
 
 var Api = {
   getStartDate: function(callback) {
-    _requestApiData('/meta', function(res) {
+    _requestApiData('/meta/start_date', function(res) {
       callback(res.data.start_date);
     });
   },
   getAllCounter: function(callback) {
-    _requestApiData('/counters/all', function(res) {
+    _requestApiData('/count', function(res) {
       return callback({
         count: res.data.count
       });
     });
   },
   getCurrentHourCounter: function(callback) {
-    var now = moment().utc();
+    var now = moment();
 
-    var route = '/counters/hour/' +
-      now.year() + '/' +
-      (now.month() + 1) + '/' +
-      now.date() + '/' +
-      now.hour();
+    var route = '/count/since/' + now.startOf('hour').valueOf();
     _requestApiData(route, function(res) {
       return callback({
         count: res.data.count
@@ -36,13 +28,10 @@ var Api = {
     });
   },
   getPreviousHourCounter: function(callback) {
-    var now = moment().subtract(1, 'hour').utc();
+    var from = moment().startOf('hour').subtract(1, 'hour').valueOf();
+    var to = moment().startOf('hour').valueOf();
 
-    var route = '/counters/hour/' +
-      now.year() + '/' +
-      (now.month() + 1) + '/' +
-      now.date() + '/' +
-      now.hour();
+    var route = '/count/from/' + from + '/to/' + to;
     _requestApiData(route, function(res) {
       return callback({
         count: res.data.count
@@ -50,40 +39,33 @@ var Api = {
     });
   },
   getCurrentDayCounter: function(callback) {
-    var now = moment().utc();
-    var year = now.year();
-    var dayOfYear = now.dayOfYear();
-    _requestApiData('/counters/date/' + year + '/' + dayOfYear, function(res) {
+    _requestApiData('/count/since/' + moment().startOf('day').valueOf(), function(res) {
       return callback({
         count: res.data.count
       });
     });
   },
   getPreviousDayCounter: function(callback) {
-    var now = moment().subtract(1, 'day').utc();
-    var year = now.year();
-    var dayOfYear = now.dayOfYear();
-    _requestApiData('/counters/date/' + year + '/' + dayOfYear, function(res) {
+    var from = moment().startOf('day').subtract(1, 'day').valueOf();
+    var to = moment().startOf('day').valueOf();
+
+    var route = '/count/from/' + from + '/to/' + to;
+    _requestApiData(route, function(res) {
       return callback({
         count: res.data.count
       });
     });
   },
   getCurrentMonthCounter: function(callback) {
-    var now = moment();
-    var year = now.utc().year();
-    var month = now.utc().month() + 1;
-    _requestApiData('/counters/month/' + year + '/' + month, function(res) {
+    _requestApiData('/count/since/' + moment().startOf('month').valueOf(), function(res) {
       return callback({
         count: res.data.count
       });
     });
   },
   getCurrentYearCounter: function(callback) {
-    var now = moment();
-    _requestApiData('/counters/year/' + now.utc().year(), function(res) {
+    _requestApiData('/count/since/' + moment().startOf('year').valueOf(), function(res) {
       return callback({
-        key: now.local().year(),
         count: res.data.count
       });
     });

@@ -1,5 +1,5 @@
-var config = require('../common/config');
-var logger = require('../common/logger');
+var config = require('../config');
+var logger = require('../common/logger')(config.logger.level || 'info');
 
 logger.info('Starting web server.');
 var express = require('express');
@@ -26,7 +26,7 @@ app.get('/', function(req, res) {
 });
 
 var port = config.web.port || 8080;
-var server = app.listen(port, function() {
+var server = app.listen(port, 'localhost', function() {
   var host = server.address().address;
   var port = server.address().port;
 

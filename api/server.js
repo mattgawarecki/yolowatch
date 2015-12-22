@@ -30,7 +30,7 @@ var router = require('./router')({
 app.use('/api', router);
 
 var port = config.api.port || 8081;
-var server = app.listen(port, function() {
+var server = app.listen(port, 'localhost', function() {
   var host = server.address().address;
   var port = server.address().port;
 
