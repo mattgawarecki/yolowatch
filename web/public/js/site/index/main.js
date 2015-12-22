@@ -105,7 +105,6 @@ function refreshCounterByName(name) {
 }
 
 function refreshRecent() {
-  console.log('refreshing recent');
   Api.getRecentTweets(function(res) {
     var recentTweets = $('.recent-tweets');
     recentTweets.empty();
