@@ -1,28 +1,25 @@
-refreshRecent();
+Api.getStartDate(function(d) {
+  var formattedDate = moment(d).format('LL');
+  $('.start-date').text(formattedDate);
 
-startCounters(function(counters) {
-  refreshCounters(counters, function() {
-    $('.loading').addClass('hidden');
-    $('.data').removeClass('hidden');
-
-    setInterval(function() {
-      refreshRecent();
-      refreshCounters(counters);
-    }, 3000);
-  });
+  enableCounters(d, function(enabledCounters) {
+    startCounters(enabledCounters, function() {
+      $('.loading').addClass('hidden');
+      $('.data').removeClass('hidden');
+    });
+  })
 });
 
-function startCounters(onStarted) {
-  Api.getStartDate(function(d) {
-    var formattedDate = moment(d).format('LL');
-    $('.start-date').text(formattedDate);
-    enableCounters(d, function(enabledCounters) {
-      // Refresh all enabled counters; when finished, notify the page
-      // that all counters have been started
-      refreshCounters(enabledCounters, function() {
-        onStarted(enabledCounters);
-      });
-    });
+function startCounters(counters, onStarted) {
+  refreshRecent();
+  refreshCounters(counters, function() {
+    onStarted();
+  });
+
+  var socket = io({ resource: '/socket' });
+  socket.on('tweet', function(tweet) {
+    refreshRecent();
+    refreshCounters(counters);
   });
 }
 

@@ -15,17 +15,23 @@ var environmentConfigs = {
       level: 'silly'
     },
     web: {
-      port: 9000
+      port: 9001
     },
     api: {
-      port: 9001,
+      port: 9002,
       recent: {
         max_count: 20
       }
     },
     worker: {
-      consumer_secret: 'CONSUMER_SECRET',
-      access_token_secret: 'ACCESS_TOKEN_SECRET'
+      port: 9003,
+      api: {
+        consumer_secret: 'CONSUMER_SECRET',
+        access_token_secret: 'ACCESS_TOKEN_SECRET'
+      },
+      events: {
+        throttle_ms: 10000
+      }
     }
   },
   production: {
@@ -41,17 +47,23 @@ var environmentConfigs = {
       level: 'info'
     },
     web: {
-      port: 9000
+      port: 9001
     },
     api: {
-      port: 9001,
+      port: 9002,
       recent: {
         max_count: 20
       }
     },
     worker: {
-      consumer_secret: 'CONSUMER_SECRET',
-      access_token_secret: 'ACCESS_TOKEN_SECRET'
+      port: 9003,
+      api: {
+        consumer_secret: 'CONSUMER_SECRET',
+        access_token_secret: 'ACCESS_TOKEN_SECRET'
+      },
+      events: {
+        throttle_ms: 10000
+      }
     }
   }
 };
